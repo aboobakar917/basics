@@ -1,0 +1,1492 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "assignment 2 model on titanic data set using KNN & Logistic Regression .ipynb",
+      "provenance": [],
+      "authorship_tag": "ABX9TyNucCwcUQXNM8POOvKgPnbu",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/fathima-yit/ML-Internship-Projects/blob/master/assignment_2_model_on_titanic_data_set_using_KNN_%26_Logistic_Regression_.ipynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "RTOXz5q-CD7O",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 402
+        },
+        "outputId": "19f33cdf-10a4-4a2d-d31b-91a8b985398b"
+      },
+      "source": [
+        "import pandas as pd\n",
+        "df = pd.read_csv('titanic_train.csv')\n",
+        "df"
+      ],
+      "execution_count": 185,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>PassengerId</th>\n",
+              "      <th>Survived</th>\n",
+              "      <th>Pclass</th>\n",
+              "      <th>Name</th>\n",
+              "      <th>Sex</th>\n",
+              "      <th>Age</th>\n",
+              "      <th>SibSp</th>\n",
+              "      <th>Parch</th>\n",
+              "      <th>Ticket</th>\n",
+              "      <th>Fare</th>\n",
+              "      <th>Cabin</th>\n",
+              "      <th>Embarked</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>1</td>\n",
+              "      <td>0</td>\n",
+              "      <td>3</td>\n",
+              "      <td>Braund, Mr. Owen Harris</td>\n",
+              "      <td>male</td>\n",
+              "      <td>22.0</td>\n",
+              "      <td>1</td>\n",
+              "      <td>0</td>\n",
+              "      <td>A/5 21171</td>\n",
+              "      <td>7.2500</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>S</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>2</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>Cumings, Mrs. John Bradley (Florence Briggs Th...</td>\n",
+              "      <td>female</td>\n",
+              "      <td>38.0</td>\n",
+              "      <td>1</td>\n",
+              "      <td>0</td>\n",
+              "      <td>PC 17599</td>\n",
+              "      <td>71.2833</td>\n",
+              "      <td>C85</td>\n",
+              "      <td>C</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>3</td>\n",
+              "      <td>1</td>\n",
+              "      <td>3</td>\n",
+              "      <td>Heikkinen, Miss. Laina</td>\n",
+              "      <td>female</td>\n",
+              "      <td>26.0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>STON/O2. 3101282</td>\n",
+              "      <td>7.9250</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>S</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>4</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>Futrelle, Mrs. Jacques Heath (Lily May Peel)</td>\n",
+              "      <td>female</td>\n",
+              "      <td>35.0</td>\n",
+              "      <td>1</td>\n",
+              "      <td>0</td>\n",
+              "      <td>113803</td>\n",
+              "      <td>53.1000</td>\n",
+              "      <td>C123</td>\n",
+              "      <td>S</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>5</td>\n",
+              "      <td>0</td>\n",
+              "      <td>3</td>\n",
+              "      <td>Allen, Mr. William Henry</td>\n",
+              "      <td>male</td>\n",
+              "      <td>35.0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>373450</td>\n",
+              "      <td>8.0500</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>S</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>...</th>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>886</th>\n",
+              "      <td>887</td>\n",
+              "      <td>0</td>\n",
+              "      <td>2</td>\n",
+              "      <td>Montvila, Rev. Juozas</td>\n",
+              "      <td>male</td>\n",
+              "      <td>27.0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>211536</td>\n",
+              "      <td>13.0000</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>S</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>887</th>\n",
+              "      <td>888</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>Graham, Miss. Margaret Edith</td>\n",
+              "      <td>female</td>\n",
+              "      <td>19.0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>112053</td>\n",
+              "      <td>30.0000</td>\n",
+              "      <td>B42</td>\n",
+              "      <td>S</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>888</th>\n",
+              "      <td>889</td>\n",
+              "      <td>0</td>\n",
+              "      <td>3</td>\n",
+              "      <td>Johnston, Miss. Catherine Helen \"Carrie\"</td>\n",
+              "      <td>female</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>1</td>\n",
+              "      <td>2</td>\n",
+              "      <td>W./C. 6607</td>\n",
+              "      <td>23.4500</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>S</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>889</th>\n",
+              "      <td>890</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>Behr, Mr. Karl Howell</td>\n",
+              "      <td>male</td>\n",
+              "      <td>26.0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>111369</td>\n",
+              "      <td>30.0000</td>\n",
+              "      <td>C148</td>\n",
+              "      <td>C</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>890</th>\n",
+              "      <td>891</td>\n",
+              "      <td>0</td>\n",
+              "      <td>3</td>\n",
+              "      <td>Dooley, Mr. Patrick</td>\n",
+              "      <td>male</td>\n",
+              "      <td>32.0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>370376</td>\n",
+              "      <td>7.7500</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>Q</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "<p>891 rows × 12 columns</p>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "     PassengerId  Survived  Pclass  ...     Fare Cabin  Embarked\n",
+              "0              1         0       3  ...   7.2500   NaN         S\n",
+              "1              2         1       1  ...  71.2833   C85         C\n",
+              "2              3         1       3  ...   7.9250   NaN         S\n",
+              "3              4         1       1  ...  53.1000  C123         S\n",
+              "4              5         0       3  ...   8.0500   NaN         S\n",
+              "..           ...       ...     ...  ...      ...   ...       ...\n",
+              "886          887         0       2  ...  13.0000   NaN         S\n",
+              "887          888         1       1  ...  30.0000   B42         S\n",
+              "888          889         0       3  ...  23.4500   NaN         S\n",
+              "889          890         1       1  ...  30.0000  C148         C\n",
+              "890          891         0       3  ...   7.7500   NaN         Q\n",
+              "\n",
+              "[891 rows x 12 columns]"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 185
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "OspYQLRLDCpa",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "df.drop('PassengerId',axis =1,inplace = True)\n",
+        "df.drop('Name',axis =1,inplace = True)\n",
+        "df.drop('Ticket',axis =1,inplace = True)\n",
+        "df.drop('Cabin',axis =1,inplace = True)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "ZF8KRSU2EtGE",
+        "colab_type": "text"
+      },
+      "source": [
+        "Age and Embarked has missing values fill it with mean value of age and for embarked fill with \"s\"*"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "7FrzhgM7EnZd",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "df['Embarked'].fillna('S', inplace = True)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "YaASs5K7InWT",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "df['Age'].fillna(df['Age'].mean(), inplace = True)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "nMaYVkVtIzqG",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 402
+        },
+        "outputId": "5704123d-2b30-4864-acb9-0a0c6ae9c0e1"
+      },
+      "source": [
+        "df"
+      ],
+      "execution_count": 189,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Survived</th>\n",
+              "      <th>Pclass</th>\n",
+              "      <th>Sex</th>\n",
+              "      <th>Age</th>\n",
+              "      <th>SibSp</th>\n",
+              "      <th>Parch</th>\n",
+              "      <th>Fare</th>\n",
+              "      <th>Embarked</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>0</td>\n",
+              "      <td>3</td>\n",
+              "      <td>male</td>\n",
+              "      <td>22.000000</td>\n",
+              "      <td>1</td>\n",
+              "      <td>0</td>\n",
+              "      <td>7.2500</td>\n",
+              "      <td>S</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>female</td>\n",
+              "      <td>38.000000</td>\n",
+              "      <td>1</td>\n",
+              "      <td>0</td>\n",
+              "      <td>71.2833</td>\n",
+              "      <td>C</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>1</td>\n",
+              "      <td>3</td>\n",
+              "      <td>female</td>\n",
+              "      <td>26.000000</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>7.9250</td>\n",
+              "      <td>S</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>female</td>\n",
+              "      <td>35.000000</td>\n",
+              "      <td>1</td>\n",
+              "      <td>0</td>\n",
+              "      <td>53.1000</td>\n",
+              "      <td>S</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>0</td>\n",
+              "      <td>3</td>\n",
+              "      <td>male</td>\n",
+              "      <td>35.000000</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>8.0500</td>\n",
+              "      <td>S</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>...</th>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>886</th>\n",
+              "      <td>0</td>\n",
+              "      <td>2</td>\n",
+              "      <td>male</td>\n",
+              "      <td>27.000000</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>13.0000</td>\n",
+              "      <td>S</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>887</th>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>female</td>\n",
+              "      <td>19.000000</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>30.0000</td>\n",
+              "      <td>S</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>888</th>\n",
+              "      <td>0</td>\n",
+              "      <td>3</td>\n",
+              "      <td>female</td>\n",
+              "      <td>29.699118</td>\n",
+              "      <td>1</td>\n",
+              "      <td>2</td>\n",
+              "      <td>23.4500</td>\n",
+              "      <td>S</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>889</th>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>male</td>\n",
+              "      <td>26.000000</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>30.0000</td>\n",
+              "      <td>C</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>890</th>\n",
+              "      <td>0</td>\n",
+              "      <td>3</td>\n",
+              "      <td>male</td>\n",
+              "      <td>32.000000</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>7.7500</td>\n",
+              "      <td>Q</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "<p>891 rows × 8 columns</p>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "     Survived  Pclass     Sex        Age  SibSp  Parch     Fare Embarked\n",
+              "0           0       3    male  22.000000      1      0   7.2500        S\n",
+              "1           1       1  female  38.000000      1      0  71.2833        C\n",
+              "2           1       3  female  26.000000      0      0   7.9250        S\n",
+              "3           1       1  female  35.000000      1      0  53.1000        S\n",
+              "4           0       3    male  35.000000      0      0   8.0500        S\n",
+              "..        ...     ...     ...        ...    ...    ...      ...      ...\n",
+              "886         0       2    male  27.000000      0      0  13.0000        S\n",
+              "887         1       1  female  19.000000      0      0  30.0000        S\n",
+              "888         0       3  female  29.699118      1      2  23.4500        S\n",
+              "889         1       1    male  26.000000      0      0  30.0000        C\n",
+              "890         0       3    male  32.000000      0      0   7.7500        Q\n",
+              "\n",
+              "[891 rows x 8 columns]"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 189
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "xpV-FnLOZlga",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 168
+        },
+        "outputId": "9df2710e-4ccc-43ed-98d4-f9a0250e6645"
+      },
+      "source": [
+        "df.isnull().sum()"
+      ],
+      "execution_count": 190,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "Survived    0\n",
+              "Pclass      0\n",
+              "Sex         0\n",
+              "Age         0\n",
+              "SibSp       0\n",
+              "Parch       0\n",
+              "Fare        0\n",
+              "Embarked    0\n",
+              "dtype: int64"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 190
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "zUx1lJ2cJLwb",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 166
+        },
+        "outputId": "0307c741-03fe-4254-9496-0ca45db14384"
+      },
+      "source": [
+        "class_group = df.groupby('Pclass').sum()\n",
+        "class_group"
+      ],
+      "execution_count": 191,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Survived</th>\n",
+              "      <th>Age</th>\n",
+              "      <th>SibSp</th>\n",
+              "      <th>Parch</th>\n",
+              "      <th>Fare</th>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>Pclass</th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "      <th></th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>136</td>\n",
+              "      <td>8002.393529</td>\n",
+              "      <td>90</td>\n",
+              "      <td>77</td>\n",
+              "      <td>18177.4125</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>87</td>\n",
+              "      <td>5495.520294</td>\n",
+              "      <td>74</td>\n",
+              "      <td>70</td>\n",
+              "      <td>3801.8417</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>119</td>\n",
+              "      <td>12964.000000</td>\n",
+              "      <td>302</td>\n",
+              "      <td>193</td>\n",
+              "      <td>6714.6951</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "        Survived           Age  SibSp  Parch        Fare\n",
+              "Pclass                                                  \n",
+              "1            136   8002.393529     90     77  18177.4125\n",
+              "2             87   5495.520294     74     70   3801.8417\n",
+              "3            119  12964.000000    302    193   6714.6951"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 191
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "XqE517xCJT6P",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 276
+        },
+        "outputId": "ea9ce752-e9d7-4b99-c3b0-21492a174f11"
+      },
+      "source": [
+        "import matplotlib.pyplot as plt\n",
+        "class_group['Survived'].plot.bar(color = 'c')\n",
+        "plt.ylabel('Survived')\n",
+        "plt.show()"
+      ],
+      "execution_count": 192,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "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\n",
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "tags": [],
+            "needs_background": "light"
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "q5OtQ6MgJ_S1",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "c26fe815-7352-4469-e080-d51d7fa85f38"
+      },
+      "source": [
+        "df.shape"
+      ],
+      "execution_count": 193,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "(891, 8)"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 193
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "MiPW-NbfKKud",
+        "colab_type": "text"
+      },
+      "source": [
+        "**Convert 'Sex' feature into numeric value**"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "pQAarxkPKI9D",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "  gd = {\"male\" : 0, \"female\": 1}\n",
+        "  data = [df]\n",
+        "\n",
+        "  for dataset in data:\n",
+        "    dataset['Sex'] = dataset['Sex'].map(gd)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "jYkYJP9MMFln",
+        "colab_type": "text"
+      },
+      "source": [
+        "**convert 'Embarked' feature into numeric value**"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "POyOBBkwMOZG",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "eb = {\"S\" : 0, \" C\" : 1, \"Q\": 2}\n",
+        "data = [df]\n",
+        "\n",
+        "for dataset in data:\n",
+        "  dataset['Embarked'] = dataset['Embarked'].map(eb)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "HOlozhCdM3kk",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 134
+        },
+        "outputId": "652355d6-6376-46d5-f7e7-b61159294b38"
+      },
+      "source": [
+        "x = df.iloc[:,[1,2,3]].values\n",
+        "y = df.iloc[:,0].values\n",
+        "print(x)"
+      ],
+      "execution_count": 197,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "[[ 3.          0.         22.        ]\n",
+            " [ 1.          1.         38.        ]\n",
+            " [ 3.          1.         26.        ]\n",
+            " ...\n",
+            " [ 3.          1.         29.69911765]\n",
+            " [ 1.          0.         26.        ]\n",
+            " [ 3.          0.         32.        ]]\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "G5cj4jAwNMNo",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "from sklearn.model_selection import train_test_split\n",
+        "x_train,x_test,y_train,y_test = train_test_split(x,y,random_state=0)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "457VyVhmNoYD",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 50
+        },
+        "outputId": "5574190f-ba4d-4bcc-a3cc-129f39a7c976"
+      },
+      "source": [
+        "print(x_train.shape)\n",
+        "print(x_test.shape)"
+      ],
+      "execution_count": 164,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "(668, 3)\n",
+            "(223, 3)\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "ehQxjhbXNyMA",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "from sklearn.preprocessing import StandardScaler\n",
+        "scaler = StandardScaler()\n",
+        "x_train = scaler.fit_transform(x_train)\n",
+        "x_test = scaler.transform(x_test)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "hCxn03T1ORH7",
+        "colab_type": "text"
+      },
+      "source": [
+        "**Building Machine Learning Model using KNN**"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "lnYoPCsUOOGl",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "from sklearn.neighbors import KNeighborsClassifier\n",
+        "model = KNeighborsClassifier(n_neighbors = 24,metric = 'euclidean')"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "EK07dhf-NzjU",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 67
+        },
+        "outputId": "c9d2c9a2-375b-4f3f-97be-6f71246fe7c0"
+      },
+      "source": [
+        "model.fit(x_train,y_train)"
+      ],
+      "execution_count": 167,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "KNeighborsClassifier(algorithm='auto', leaf_size=30, metric='euclidean',\n",
+              "                     metric_params=None, n_jobs=None, n_neighbors=24, p=2,\n",
+              "                     weights='uniform')"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 167
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "l7pt57r4TmhN",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 202
+        },
+        "outputId": "b19e01ee-e201-403a-d8c4-2b9f7d8a3ec8"
+      },
+      "source": [
+        "y_pred = model.predict(x_test)\n",
+        "y_pred"
+      ],
+      "execution_count": 168,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "array([0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1,\n",
+              "       0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,\n",
+              "       1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,\n",
+              "       1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0,\n",
+              "       1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1,\n",
+              "       0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,\n",
+              "       0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0,\n",
+              "       1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,\n",
+              "       1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1,\n",
+              "       0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1,\n",
+              "       0, 1, 0])"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 168
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "vLzH8asaTwq6",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 202
+        },
+        "outputId": "847da0bf-6833-4780-c15a-74c04ee58a8b"
+      },
+      "source": [
+        "y_test"
+      ],
+      "execution_count": 169,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "array([0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1,\n",
+              "       0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0,\n",
+              "       1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,\n",
+              "       1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1,\n",
+              "       1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1,\n",
+              "       0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,\n",
+              "       0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0,\n",
+              "       1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0,\n",
+              "       1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1,\n",
+              "       1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1,\n",
+              "       0, 1, 1])"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 169
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "ahUH533VT2NE",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "e8f80844-d0d3-4c56-871e-58aff0e4dc56"
+      },
+      "source": [
+        "from sklearn.metrics import accuracy_score\n",
+        "g = accuracy_score(y_test,y_pred)*100\n",
+        "print(g)"
+      ],
+      "execution_count": 175,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "78.02690582959642\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "19Q9kq9XUFEu",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 50
+        },
+        "outputId": "4963d715-2374-47b5-f21b-bd164e495031"
+      },
+      "source": [
+        "from sklearn.metrics import accuracy_score,confusion_matrix,classification_report\n",
+        "confusion_matrix(y_test,y_pred)"
+      ],
+      "execution_count": 176,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "array([[122,  17],\n",
+              "       [ 32,  52]])"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 176
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "NylEOk82Ua1J",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 168
+        },
+        "outputId": "b1db825d-ab86-44a1-95e7-525943abdee8"
+      },
+      "source": [
+        "print(classification_report(y_test,y_pred))"
+      ],
+      "execution_count": 177,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "              precision    recall  f1-score   support\n",
+            "\n",
+            "           0       0.79      0.88      0.83       139\n",
+            "           1       0.75      0.62      0.68        84\n",
+            "\n",
+            "    accuracy                           0.78       223\n",
+            "   macro avg       0.77      0.75      0.76       223\n",
+            "weighted avg       0.78      0.78      0.78       223\n",
+            "\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "99gFF6TYUlZ1",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "01601b5b-b53d-49da-a8aa-7eedf1db9a7f"
+      },
+      "source": [
+        "model.classes_"
+      ],
+      "execution_count": 178,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "array([0, 1])"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 178
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "gppWan38bXR4",
+        "colab_type": "text"
+      },
+      "source": [
+        "**Building Machine Learning Model using Logistic Regression**"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "0SBOWDUCbj0P",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "from sklearn.linear_model import LogisticRegression\n",
+        "model = LogisticRegression()\n"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "sODLMkrWb7uj",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 101
+        },
+        "outputId": "3eb134c4-d05a-4bd4-9dd2-216e8e3bfebe"
+      },
+      "source": [
+        "model.fit(x_train,y_train)"
+      ],
+      "execution_count": 180,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,\n",
+              "                   intercept_scaling=1, l1_ratio=None, max_iter=100,\n",
+              "                   multi_class='auto', n_jobs=None, penalty='l2',\n",
+              "                   random_state=None, solver='lbfgs', tol=0.0001, verbose=0,\n",
+              "                   warm_start=False)"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 180
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "AaN--xkhcFzG",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 202
+        },
+        "outputId": "a4317583-5862-47de-fbbf-a9d402bedad4"
+      },
+      "source": [
+        "y_pred = model.predict(x_test)\n",
+        "y_pred"
+      ],
+      "execution_count": 181,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "array([0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1,\n",
+              "       0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,\n",
+              "       1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0,\n",
+              "       1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0,\n",
+              "       1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1,\n",
+              "       0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,\n",
+              "       0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0,\n",
+              "       1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0,\n",
+              "       1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1,\n",
+              "       0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1,\n",
+              "       0, 1, 1])"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 181
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "JutLPVomcTKt",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 202
+        },
+        "outputId": "82dd8cbf-3bda-4fd8-ae21-6882f20586a6"
+      },
+      "source": [
+        "y_test"
+      ],
+      "execution_count": 182,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "array([0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1,\n",
+              "       0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0,\n",
+              "       1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,\n",
+              "       1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1,\n",
+              "       1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1,\n",
+              "       0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,\n",
+              "       0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0,\n",
+              "       1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0,\n",
+              "       1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1,\n",
+              "       1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1,\n",
+              "       0, 1, 1])"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 182
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "LUOQHmj4cY8O",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "ae843079-dc17-4f67-9073-4d842b5eabcc"
+      },
+      "source": [
+        "from sklearn.metrics import accuracy_score\n",
+        "f=accuracy_score(y_test,y_pred)*100\n",
+        "f"
+      ],
+      "execution_count": 183,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "79.37219730941703"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 183
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "PzMrXdQVcvbn",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "a358836a-5f5a-4375-f88b-06fcf35e00d9"
+      },
+      "source": [
+        "test = [[3,1,22]]\n",
+        "test = scaler.transform(test)\n",
+        "model.predict_proba(test)"
+      ],
+      "execution_count": 198,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "array([[0.36076074, 0.63923926]])"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 198
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "SgjRbp6Cdr_6",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "139e0a89-7af6-40b6-d1f4-f55803906627"
+      },
+      "source": [
+        "0.36076074 + 0.63923926"
+      ],
+      "execution_count": 199,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "1.0"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 199
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "Ztrf56kAd2BU",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 50
+        },
+        "outputId": "cf389c29-ecb1-4e82-b96f-8582cf78c0d1"
+      },
+      "source": [
+        "from sklearn.metrics import accuracy_score,confusion_matrix,classification_report\n",
+        "confusion_matrix(y_test,y_pred)"
+      ],
+      "execution_count": 200,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "array([[117,  22],\n",
+              "       [ 24,  60]])"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 200
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "YY0tWV8veOFF",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "a71b3e72-fd21-43ea-b468-9e07eb18ea6e"
+      },
+      "source": [
+        "model.classes_"
+      ],
+      "execution_count": 201,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "array([0, 1])"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 201
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "HWfajNl3eToA",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 168
+        },
+        "outputId": "8e003121-d910-4f44-c07a-e1d1072ba21a"
+      },
+      "source": [
+        "print(classification_report(y_test,y_pred))"
+      ],
+      "execution_count": 202,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "              precision    recall  f1-score   support\n",
+            "\n",
+            "           0       0.83      0.84      0.84       139\n",
+            "           1       0.73      0.71      0.72        84\n",
+            "\n",
+            "    accuracy                           0.79       223\n",
+            "   macro avg       0.78      0.78      0.78       223\n",
+            "weighted avg       0.79      0.79      0.79       223\n",
+            "\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "8QywUccYfN8M",
+        "colab_type": "text"
+      },
+      "source": [
+        "**Accuracy using KNN: 78.02690582959642**"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "5iO19KCmgYv6",
+        "colab_type": "text"
+      },
+      "source": [
+        "**Accuracy using Logistic Regression : 79.37219730941703**"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "0kcmrYhtgqV8",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": 0,
+      "outputs": []
+    }
+  ]
+}
